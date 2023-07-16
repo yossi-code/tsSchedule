@@ -1,0 +1,88 @@
+//
+//----------------------------------------------------------------------------------------------------------------------
+// Define uma "solução" para o horário de aulas que contempla o horário de aulas de cada uma das turmas definidas
+//   para serem manipuladas durante a execução da aplicação.
+//
+//   Instituição de Ensino
+//         Unidades Acadêmicas
+//                  Cursos
+//                     Turmas
+//                         Turma-A --> matriz curricular --> disciplinas que aquela turma possui
+//----------------------------------------------------------------------------------------------------------------------
+//
+//
+// ID --> ID da solução de horário de aulas
+//
+// classSlots
+//             ---------------------------------------------------------------------
+//             Dia semana    Dia da semana   Dia da semana       .... Dia da semana
+//             Dom(07 slots) Seg (07 slots)  Ter (07 slots)           Sab (07 slots)
+//             0          6  7           13  14          20           42          48
+//             ---------------------------------------------------------------------
+//      Turma  Slot-0 Slot-1 Slot-2 Slot-3 ... Slot-K... Slot-(M-1)
+//        0     -1      x     -1      10         -1/x                   x -> o índice da oferta (disciplina, professor, sala)
+//        1                                                                  que está alocada no slot ou INVALID_INDEX (-1)
+//        2                                                            10   (Língua Portuguesa, Machado, 102)
+//        .                                                            14   (Matemática, Poincaré, 301)
+//        .                                                            26   (Geografia, João, INVALID_INDEX)
+//        .
+//      (N-1)
+//
+//
+// classOffers
+//             ---------------------------------------------------------------------
+//             Dia semana    Dia da semana   Dia da semana       .... Dia da semana
+//             Dom(07 slots) Seg (07 slots)  Ter (07 slots)           Sab (07 slots)
+//             0          6  7           13  14          20           42          48
+//             ---------------------------------------------------------------------
+//      Turma  Offer-0 Offer-1 Off2-2 Offer-3 ... Offer-10.. Offer-
+//        0     -1      y                            3                y -> o índice do slot onde a oferta está
+//        1                                                                alocada ou INVALID_INDEX (-1)
+//        2
+//        .
+//        ..
+//        .
+//      (N-1)
+//
+// notAllocatedOffers
+//        0           --> lista linear da turma (contendo os índices das ofertas que ainda não foram alocadas)
+//        1           -->
+//        2
+//        .
+//        ..
+//        .
+//      (N-1)
+//
+// São 06 (seis) instâncias de TCost:
+//
+//timeTablingCost (não usados: teachersCost, classesCost, disciplinesCost, roomsCost e staffsCost)
+//
+//
+
+  TSolutionInfo = record
+    ID                     : integer;                 // ID solução no conjunto de soluções
+    classSlots             : TIntegerMatrix2D;        // Define qual é o índice da oferta que está alocada em cada um
+                                                      // dos "timeslots (já agregados)" (colunas da matriz) para a turma
+                                                      // correspondente(linhas da matriz) ou tem o valor INVALID_INDEX.
+                                                      // para indicar que o "timeslot" está livre (não há aula nele).
+    classOffers            : TIntegerMatrix2D;        // Define qual é o índice do "timeslot"(na sua forma não agregada)
+                                                      // no qual cada uma das ofertas (colunas) está alocada para
+                                                      // a turma correspondente
+                                                      // (linhas). O valor INVALID_INDEX (-1) indica que aquela
+                                                      // oferta não está alocada.
+    notAllocatedOffers     : TArrayList;              // Armazena um "vetor" de listas, contendo as ofertas
+                                                      // não alocadas de cada turma separadamente (posiões distintas de
+                                                      // memória).
+                                                      // Cada lista, por sua vez, contém uma lista com as
+                                                      // correspondentes ofertas referentes à mesma disciplina/tipo
+                                                      // de disciplina.
+    costs                  : TCostArray;              // Custos (função objetivo) associados à solução
+                                                      //
+                                                      //   F0 = F1 + F2 + ... + F7 + F8
+                                                      //
+                                                      //   TCost = record
+                                                      //    parcelCount  : integer;
+                                                      //    values       : TVectorReal;
+                                                      //    updateFlags  : TVectorBoolean;
+                                                      // end;
+  end; 
