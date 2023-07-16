@@ -5,9 +5,9 @@ class TSolutionInfo:
     Id = 0
     classSlots = [[-1] * turmas for _ in range(slots)]
     days_of_week = [
-        [[None] * 7 for _ in range(5)],
-        [[None] * 7 for _ in range(5)],
-        [[None] * 7 for _ in range(5)],
+        [[-1] * 7 for _ in range(5)],
+        [[-1] * 7 for _ in range(5)],
+        [[-1] * 7 for _ in range(5)],
     ]
 
     def assignWeek(self, offer_index, Turma, Offer):
@@ -25,7 +25,7 @@ class TSolutionInfo:
                 # Reset empty slots count each day
                 empty_slots_count = 0
                 for index_slot, slot in enumerate(day):
-                    if (slot is None):
+                    if (slot == -1):
                         empty_slots_count += 1
                         print('Turma: ', index_turma, 'Day: ', index_day, 'Slot - vago: ', index_slot, 'Slot Count: ', empty_slots_count)
                     else:
@@ -33,7 +33,17 @@ class TSolutionInfo:
                 if empty_slots_count // 7 > 0:
                         cost += 10
     
-        print("Total cost:", cost)
+        return(cost)
+    
+    def printSolution(self):
+        for row in self.classSlots:
+            for slot in row:
+                if slot != -1:
+                    # Access and process the element
+                    print(slot.Id, end=' ')
+                else:
+                    print(slot, end=' ')
+            print()
 
 
 

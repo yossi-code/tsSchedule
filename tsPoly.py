@@ -53,16 +53,31 @@ solution1.Id = 1
 assignOfferToClass(offers, solution1)
 
 # Print the assigned offers
-for row in solution1.classSlots:
-    for slot in row:
-        if slot != -1:
-            # Access and process the element
-            print(slot.Id, end=' ')
-        else:
-            print(slot, end=' ')
-    print()
+solution1.printSolution()
+print(solution1.solutionCosts())
 
-solution1.solutionCosts()
+solution2 = TSolutionInfo()
+solution2.Id = 2
+solution2.classSlots = [row.copy() for row in solution1.classSlots]
+solution2.days_of_week = [
+    [day.copy() for day in turma]
+    for turma in solution1.days_of_week
+]
+
+# Randomly switch two class slots in solution2
+row_idx1 = random.randint(0, len(solution2.classSlots)-1)
+col_idx1 = random.randint(0, len(solution2.classSlots[0])-1)
+row_idx2 = random.randint(0, len(solution2.classSlots)-1)
+col_idx2 = random.randint(0, len(solution2.classSlots[0])-1)
+
+solution2.classSlots[row_idx1][col_idx1], solution2.classSlots[row_idx2][col_idx2] = \
+    solution2.classSlots[row_idx2][col_idx2], solution2.classSlots[row_idx1][col_idx1]
+
+solution2.assignWeek(row_idx1, col_idx1, solution2.classSlots[row_idx1][col_idx1])
+solution2.assignWeek(row_idx2, col_idx2, solution2.classSlots[row_idx2][col_idx2])
+
+solution2.printSolution()
+print(solution2.solutionCosts())
 
 #print(solution1.days_of_week[1][0][0].Professor)
 
