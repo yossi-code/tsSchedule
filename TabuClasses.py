@@ -36,7 +36,7 @@ class TSolutionInfo:
                         print('Turma: ', index_turma, 'Day: ', index_day, 'OfferId: ', slot.Id)
                 if self.empty_slots_count // 7 > 0:
                         self.cost += 10
-                if self.empty_slots_count // 4 > 0:
+                if self.empty_slots_count // 3 > 0:
                         self.cost += 2
         return(self.cost)
     
@@ -70,12 +70,14 @@ class TSolutionInfo:
         solution2.assignWeek(row_idx2, col_idx2, solution2.classSlots[row_idx2][col_idx2])
 
     def checkAssignBestSolution(solution1, solution2):
-        if (solution2.solutionCosts() < solution1.solutionCosts()):
+        if (solution2.solutionCosts() <= solution1.solutionCosts()):
             print('S1 Cost: ', solution1.solutionCosts())
             print('S2 Cost: ', solution2.solutionCosts())
             return solution2
         else:
+            print('Solution 1 < Solution 2, S1 Cost: ', solution1.cost, 'S2 Cost: ', solution2.cost)
             return solution1
+        
 
 class Offer:
     def __init__(self):
