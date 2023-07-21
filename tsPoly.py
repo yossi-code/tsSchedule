@@ -28,56 +28,40 @@ offers.append(Offer().assignOffer('18', 'Economia', 'Raquel'))
 offers.append(Offer().assignOffer('19', 'Sociologia', 'Fernando'))
 offers.append(Offer().assignOffer('20', 'Sociologia', 'Fernando'))
 
-def assignOfferToClass(offers, solution):
-    offer_index = 0
-    num_rows = len(solution.classSlots)
-    num_cols = len(solution.classSlots[0])
-
-    for col_idx in range(num_cols):
-            for row_idx in range(num_rows):
-                    slot = solution.classSlots[row_idx][col_idx]
-                    if slot == -1:
-                    # Assign the offer to the class slot
-                            solution.classSlots[row_idx][col_idx] = offers[offer_index]
-                            solution.assignWeek(row_idx, col_idx, offers[offer_index])
-                            offer_index += 1
-                            if offer_index == len(offers):
-                                    random.shuffle(offers)
-                                    offer_index = 0
-                                    break
-
 
 solution1 = TSolutionInfo()
-solution1.Id = 1
+solution1.Id = 0
+Offer.assignOfferToClass(offers, solution1)
 
-assignOfferToClass(offers, solution1)
+bestSolution = solution1
 
 # Print the assigned offers
 solution1.printSolution()
 print(solution1.solutionCosts())
 
-solution2 = TSolutionInfo()
-solution2.Id = 2
-solution2.classSlots = [row.copy() for row in solution1.classSlots]
-solution2.days_of_week = [
-    [day.copy() for day in turma]
-    for turma in solution1.days_of_week
-]
+numberOfIterations = 100
+solutionArray = []
+bestSolutionCost = 0
+noImprovement = 0
 
-# Randomly switch two class slots in solution2
-row_idx1 = random.randint(0, len(solution2.classSlots)-1)
-col_idx1 = random.randint(0, len(solution2.classSlots[0])-1)
-row_idx2 = random.randint(0, len(solution2.classSlots)-1)
-col_idx2 = random.randint(0, len(solution2.classSlots[0])-1)
+for i in range(1, numberOfIterations):
+    solution = TSolutionInfo()
+    solution.Id = i
+    TSolutionInfo.switchRandomSlots(bestSolution, solution)
+    bestSolution = TSolutionInfo.checkAssignBestSolution(bestSolution, solution)
+    bestSolutionCost = bestSolution.cost
+    if bestSolutionCost < solution.cost:
+         noImprovement += 1
+    solutionArray.append(solution)
+    #if noImprovement > 50:
+    #    break
 
-solution2.classSlots[row_idx1][col_idx1], solution2.classSlots[row_idx2][col_idx2] = \
-    solution2.classSlots[row_idx2][col_idx2], solution2.classSlots[row_idx1][col_idx1]
+print("Best Solution: ")
+bestSolution.printSolution()
+print("Best Solution Cost: ", bestSolution.solutionCosts())
 
-solution2.assignWeek(row_idx1, col_idx1, solution2.classSlots[row_idx1][col_idx1])
-solution2.assignWeek(row_idx2, col_idx2, solution2.classSlots[row_idx2][col_idx2])
 
-solution2.printSolution()
-print(solution2.solutionCosts())
+
 
 #print(solution1.days_of_week[1][0][0].Professor)
 
