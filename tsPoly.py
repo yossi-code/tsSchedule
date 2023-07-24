@@ -53,8 +53,8 @@ for i in range(1, numberOfIterations):
     if bestSolutionCost < solution.cost:
          noImprovement += 1
     solutionArray.append(solution)
-    #if noImprovement > 50:
-    #    break
+    if noImprovement > 100:
+        break
 
 print("Best Solution: ")
 bestSolution.printSolution()
