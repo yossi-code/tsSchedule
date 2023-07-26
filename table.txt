@@ -1,0 +1,9 @@
++-----------+-------------------+------------------------+------------------------+------------------------+-----------+---------------------+------------------------+
+|           |                   |         Turma          |         Monday         |        Tuesday         | Wednesday |      Thursday       |         Friday         |
++-----------+-------------------+------------------------+------------------------+------------------------+-----------+---------------------+------------------------+
+|  Monday   | Economia - Raquel | Matemática - Wanderley |         Empty          | Sociologia - Fernando  |   Empty   | Biologia - Fernando |    Química - Maria     |
+|  Tuesday  | Economia - Raquel |    Química - Maria     | Matemática - Wanderley |   Economia - Raquel    |   Empty   |    Artes - Maria    | Matemática - Wanderley |
+| Wednesday |   Física - Jose   |    Química - Maria     |     Física - Jose      | Sociologia - Fernando  |   Empty   |        Empty        |     Física - Jose      |
+| Thursday  |       Empty       |         Empty          |         Empty          | Matemática - Wanderley |   Empty   |    Física - Jose    |         Empty          |
+|  Friday   |       Empty       |         Empty          |         Empty          |     Física - Jose      |   Empty   |        Empty        |   Economia - Raquel    |
++-----------+-------------------+------------------------+------------------------+------------------------+-----------+---------------------+------------------------+

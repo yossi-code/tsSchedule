@@ -39,7 +39,7 @@ bestSolution = solution1
 solution1.printSolution()
 print(solution1.solutionCosts())
 
-numberOfIterations = 5000
+numberOfIterations = 100
 solutionArray = []
 bestSolutionCost = 0
 noImprovement = 0
@@ -59,6 +59,7 @@ for i in range(1, numberOfIterations):
 print("Best Solution: ")
 bestSolution.printSolution()
 print("Best Solution Cost: ", bestSolution.solutionCosts())
+bestSolution.printSchedule()
 
 
 

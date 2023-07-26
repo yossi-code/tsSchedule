@@ -1,4 +1,5 @@
 import random
+from tabulate import tabulate
 
 slots = 35
 turmas = 3
@@ -78,6 +79,26 @@ class TSolutionInfo:
             print('Solution 1 < Solution 2, S1 Cost: ', solution1.cost, 'S2 Cost: ', solution2.cost)
             return solution1
         
+    def printSchedule(self):
+        week_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+        turma_labels = ["Turma 1", "Turma 2", "Turma 3"]
+
+        for turma_idx, turma in enumerate(self.days_of_week):
+            print(f"\n{turma_labels[turma_idx]} Schedule:\n")
+
+            # Create table_data for the current turma
+            table_data = []
+            for day_idx, day in enumerate(turma):
+                day_schedule = [week_days[day_idx]]
+                for slot_idx, slot in enumerate(day):
+                    if slot == -1:
+                        day_schedule.append("Empty")
+                    else:
+                        day_schedule.append(f"{slot.Disciplina} - {slot.Professor}")
+                table_data.append(day_schedule)
+
+            print(tabulate(table_data, headers=["Day", "Slot 1", "Slot 2", "Slot 3", "Slot 4", "Slot 5", "Slot 6", "Slot 7"], tablefmt="grid"))
+
 
 class Offer:
     def __init__(self):
