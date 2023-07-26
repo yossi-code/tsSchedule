@@ -97,7 +97,7 @@ class TSolutionInfo:
                         day_schedule.append(f"{slot.Disciplina} - {slot.Professor}")
                 table_data.append(day_schedule)
 
-            print(tabulate(table_data, headers=["Day", "Slot 1", "Slot 2", "Slot 3", "Slot 4", "Slot 5", "Slot 6", "Slot 7"], tablefmt="grid"))
+            print(tabulate(table_data, headers=["Day", "Slot 1", "Slot 2", "Slot 3", "Slot 4", "Slot 5", "Slot 6", "Slot 7"], tablefmt="pretty"))
 
 
 class Offer:
