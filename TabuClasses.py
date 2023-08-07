@@ -32,13 +32,11 @@ class TSolutionInfo:
                     if (slot == -1):
                         self.empty_slots_count += 1
                         self.cost += 1
-                        print('Turma: ', index_turma, 'Day: ', index_day, 'Slot - vago: ', index_slot, 'Slot Count: ', self.empty_slots_count, 'Total Cost: ', self.cost)
-                    else:
-                        print('Turma: ', index_turma, 'Day: ', index_day, 'OfferId: ', slot.Id)
                 if self.empty_slots_count // 7 > 0:
                         self.cost += 10
                 if self.empty_slots_count // 3 > 0:
                         self.cost += 2
+        self.checkProfessorSchedule()
         return(self.cost)
     
     def printSolution(self):
@@ -98,7 +96,45 @@ class TSolutionInfo:
                 table_data.append(day_schedule)
 
             print(tabulate(table_data, headers=["Day", "Slot 1", "Slot 2", "Slot 3", "Slot 4", "Slot 5", "Slot 6", "Slot 7"], tablefmt="pretty"))
+            self.solutionCosts()
+            print("Solution Cost: ", self.cost)
+    
+    def checkProfessorSchedule(self):
+        professor_slots = {}
 
+        for turma_idx, turma in enumerate(self.days_of_week):
+            for day_idx, day in enumerate(turma):
+                for slot_idx, slot in enumerate(day):
+                    if slot != -1:
+                        professor = slot.Professor
+                        professor_key = (professor, day_idx, slot_idx)  # Use tuple as the key
+
+                        if professor_key in professor_slots:
+                            professor_slots[professor_key].append(turma_idx)
+                            self.cost += 20
+                        else:
+                            professor_slots[professor_key] = [turma_idx]
+
+        # Print the professors assigned to the same day and slot in different turmas
+        for professor_key, turmas in professor_slots.items():
+            if len(turmas) > 1:
+                professor, day_idx, slot_idx = professor_key
+                day_display, slot_display = day_idx +1, slot_idx +1
+                print(f"Professor {professor} is assigned to Day {day_display}, Slot {slot_display} in Turmas: {turmas}")
+
+    def swapSlotsManually(self, turma1, day1, slot1, turma2, day2, slot2):
+        if turma1 not in range(len(self.days_of_week)) or turma2 not in range(len(self.days_of_week)):
+            print("Invalid Turma index.")
+            return
+        if day1 not in range(len(self.days_of_week[0])) or day2 not in range(len(self.days_of_week[0])):
+            print("Invalid Day index.")
+            return
+        if slot1 not in range(len(self.days_of_week[0][0])) or slot2 not in range(len(self.days_of_week[0][0])):
+            print("Invalid Slot index.")
+            return
+
+        self.days_of_week[turma1][day1][slot1], self.days_of_week[turma2][day2][slot2] = \
+            self.days_of_week[turma2][day2][slot2], self.days_of_week[turma1][day1][slot1]
 
 class Offer:
     def __init__(self):
