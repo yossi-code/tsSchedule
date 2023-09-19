@@ -1,10 +1,13 @@
 import random
+import time
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from TabuClasses import TSolutionInfo, Offer
 
 # Como achar o dia? Slot 10 -> 10 / 7 (Dia da semana) -> 10 MOD 7 (Slot daquele dia)
+
+start_time = time.time()
 
 offers = []
 offers.append(Offer().assignOffer('1', 'Matemática', 'Wanderley'))
@@ -27,7 +30,13 @@ offers.append(Offer().assignOffer('17', 'Economia', 'Raquel'))
 offers.append(Offer().assignOffer('18', 'Economia', 'Raquel'))
 offers.append(Offer().assignOffer('19', 'Sociologia', 'Fernando'))
 offers.append(Offer().assignOffer('20', 'Sociologia', 'Fernando'))
-
+offers.append(Offer().assignOffer('21', 'Programacao', 'Geovanna'))
+offers.append(Offer().assignOffer('22', 'Programacao', 'Geovanna'))
+offers.append(Offer().assignOffer('23', 'Programacao', 'Geovanna'))
+offers.append(Offer().assignOffer('24', 'Programacao', 'Geovanna'))
+offers.append(Offer().assignOffer('25', 'Estatistica', 'Myrella'))
+offers.append(Offer().assignOffer('28', 'Estatistica', 'Myrella'))
+offers.append(Offer().assignOffer('26', 'Estatistica', 'Myrella'))
 
 solution1 = TSolutionInfo()
 solution1.Id = 0
@@ -35,22 +44,24 @@ Offer.assignOfferToClass(offers, solution1)
 
 bestSolution = solution1
 
-numberOfIterations = 5000
+numberOfIterations = int(input("Number of Iterations?\n"))
 solutionArray = []
 bestSolutionCost = 0
 noImprovement = 0
 
 for i in range(1, numberOfIterations):
-    solution = TSolutionInfo()
+    solution = bestSolution.generateRandomSolutions()
     solution.Id = i
-    TSolutionInfo.switchRandomSlots(bestSolution, solution)
     bestSolution = TSolutionInfo.checkAssignBestSolution(bestSolution, solution)
     bestSolutionCost = bestSolution.cost
     if bestSolutionCost < solution.cost:
-         noImprovement += 1
+        noImprovement += 1
     solutionArray.append(solution)
-    if noImprovement > 100:
+    if noImprovement > 200:
         break
+
+print("Best Solution = ", bestSolution.Id)
+print("--- %s seconds ---" % (time.time() - start_time))
 
 def main():
 
@@ -67,7 +78,7 @@ def main():
         if choice == "1":
             print("Select a solution to view the schedule:")
             for i, solution in enumerate(solutionArray):
-                print(f"{i + 1}. Solution {solution.Id}")
+                print(f"{i + 1}. Solution {solution.Id} - Cost: {solution.cost}")
             try:
                 selected_solution_index = int(input("Enter the solution number: ")) - 1
                 selected_solution = solutionArray[selected_solution_index]
