@@ -14,9 +14,9 @@ tabu_list = []
 
 class TSolutionInfo:
     Id = 0
-    cost = 0
     useTabu = False
-    incidentWeights = [10, 5, 1, 20, 3]
+    cost = 0
+    incidentWeights = [0] * 5
     incidentCosts = [0] * len(incidentWeights)
     classSlots = [[-1] * turmas for _ in range(slots)]
     days_of_week = [
@@ -24,6 +24,11 @@ class TSolutionInfo:
         [[-1] * 7 for _ in range(5)],
         [[-1] * 7 for _ in range(5)],
     ]
+
+    def getUserWeights(self):
+        for i in range(len(self.incidentWeights)):
+            userInput = input(f"Enter the value for the 5 Weights {i}: ")
+            self.incidentWeights[i] = int(userInput)
 
     def assignWeek(self, offer_index, Turma, Offer):
         self.days_of_week[Turma][offer_index // 7][offer_index % 7] = Offer
