@@ -30,6 +30,16 @@ class TSolutionInfo:
             userInput = input(f"Enter the value for the 5 Weights {i}: ")
             self.incidentWeights[i] = int(userInput)
 
+    def getTabuBool(self):
+        tabuInput = input(f"Enter Y or N").upper()
+        if tabuInput == 'Y':
+            return True
+        elif tabuInput == 'N':
+            return False
+        else: 
+            print("Invalid Input")
+        self.useTabu = input()
+
     def assignWeek(self, offer_index, Turma, Offer):
         self.days_of_week[Turma][offer_index // 7][offer_index % 7] = Offer
 

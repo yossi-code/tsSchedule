@@ -46,6 +46,7 @@ bestSolution = solution1
 
 numberOfIterations = int(input("Number of Iterations?\n"))
 TSolutionInfo.getUserWeights(solution1)
+TSolutionInfo.getTabuBool(solution1)
 solutionArray = []
 bestSolutionCost = 0
 noImprovement = 0
