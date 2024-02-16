@@ -65,6 +65,10 @@ for i in range(1, numberOfIterations):
 print("Best Solution = ", bestSolution.Id)
 print("--- %s seconds ---" % (time.time() - start_time))
 
+def saveSolutionsToCSV(solutionArray, filename='solutions.csv'):
+    solutions_df = pd.DataFrame([solution.__dict__ for solution in solutionArray])
+    solutions_df.to_csv(filename, index=False)
+
 def main():
 
     print("Welcome to the Schedule Manager!")
@@ -123,6 +127,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+    saveSolutionsToCSV(solutionArray)
 
 
 

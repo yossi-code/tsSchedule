@@ -13,10 +13,9 @@ tabu_list = []
 # F4 = Buraco 2 (2 slots)  Peso -> 3
 
 class TSolutionInfo:
-    Id = 0
-    useTabu = False
+    Id = 0 
     cost = 0
-    incidentWeights = [0] * 5
+    incidentWeights = [10, 5, 1, 20, 3]
     incidentCosts = [0] * len(incidentWeights)
     classSlots = [[-1] * turmas for _ in range(slots)]
     days_of_week = [
@@ -24,21 +23,28 @@ class TSolutionInfo:
         [[-1] * 7 for _ in range(5)],
         [[-1] * 7 for _ in range(5)],
     ]
+    useTabu = False
 
     def getUserWeights(self):
-        for i in range(len(self.incidentWeights)):
-            userInput = input(f"Enter the value for the 5 Weights {i}: ")
-            self.incidentWeights[i] = int(userInput)
+        userChoice = input(f"Enter Y for Default Weights or N for Custom")
+        if userChoice == 'Y':
+            print(self.incidentWeights)
+        if userChoice == 'N':
+            for i in range(len(self.incidentWeights)):
+                userInput = input(f"Enter the value for the Weight {i}: ")
+                self.incidentWeights[i] = int(userInput)
+            print(self.incidentWeights)
 
     def getTabuBool(self):
-        tabuInput = input(f"Enter Y or N").upper()
+        tabuInput = input(f"Enter Y or N for Tabu").upper()
         if tabuInput == 'Y':
+            self.useTabu = True
             return True
         elif tabuInput == 'N':
+            self.useTabu = False
             return False
         else: 
             print("Invalid Input")
-        self.useTabu = input()
 
     def assignWeek(self, offer_index, Turma, Offer):
         self.days_of_week[Turma][offer_index // 7][offer_index % 7] = Offer
@@ -96,8 +102,9 @@ class TSolutionInfo:
 
             if (row_idx1, col_idx1, row_idx2, col_idx2) not in tabu_list and self.useTabu == True:
                 solution2 = TSolutionInfo()
+                solution2.useTabu = self.useTabu
                 print("Not in Tabu and Tabu = TRUE")
-                print(solution2.useTabu)
+                print(solution2.getTabuBool)
                 solution2.classSlots = [row.copy() for row in self.classSlots]
                 solution2.days_of_week = [
                     [day.copy() for day in turma]
@@ -112,8 +119,9 @@ class TSolutionInfo:
                 return solution2
             elif (self.useTabu == False):
                 solution2 = TSolutionInfo()
+                solution2.useTabu = self.useTabu
                 print("Tabu = FALSE")
-                print(solution2.useTabu)
+                print(solution2.getTabuBool)
                 solution2.classSlots = [row.copy() for row in self.classSlots]
                 solution2.days_of_week = [
                     [day.copy() for day in turma]
@@ -137,12 +145,10 @@ class TSolutionInfo:
         if (solution2.solutionCosts() < solution1.solutionCosts()):
             print('S1 Cost: ', solution1.solutionCosts())
             print('S2 Cost: ', solution2.solutionCosts())
-            print('Returning Solution 2')
             return solution2
         else:
             print('S1 Cost: ', solution1.solutionCosts())
             print('S2 Cost: ', solution2.solutionCosts())
-            print('Returning Solution 1')
             return solution1
         
     def printSchedule(self):
