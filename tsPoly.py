@@ -45,6 +45,8 @@ Offer.assignOfferToClass(offers, solution1)
 bestSolution = solution1
 
 numberOfIterations = int(input("Number of Iterations?\n"))
+TSolutionInfo.getUserWeights(solution1)
+TSolutionInfo.getTabuBool(solution1)
 solutionArray = []
 bestSolutionCost = 0
 noImprovement = 0
@@ -62,6 +64,10 @@ for i in range(1, numberOfIterations):
 
 print("Best Solution = ", bestSolution.Id)
 print("--- %s seconds ---" % (time.time() - start_time))
+
+def saveSolutionsToCSV(solutionArray, filename='solutions.csv'):
+    solutions_df = pd.DataFrame([solution.__dict__ for solution in solutionArray])
+    solutions_df.to_csv(filename, index=False)
 
 def main():
 
@@ -121,6 +127,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+    saveSolutionsToCSV(solutionArray)
 
 
 
