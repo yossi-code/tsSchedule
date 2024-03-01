@@ -223,7 +223,6 @@ class Offer:
         return self  # Return the modified instance of the class
     
     def assignOfferToClass(self, solution):
-        offer_index = 0
         num_rows = len(solution.classSlots)
         num_cols = len(solution.classSlots[0])
 
@@ -232,10 +231,6 @@ class Offer:
                         slot = solution.classSlots[row_idx][col_idx]
                         if slot == -1:
                         # Assign the offer to the class slot
-                                solution.classSlots[row_idx][col_idx] = self[offer_index]
-                                solution.assignWeek(row_idx, col_idx, self[offer_index])
-                                offer_index += 1
-                                if offer_index == len(self):
-                                        random.shuffle(self)
-                                        offer_index = 0
-                                        break
+                                solution.classSlots[row_idx][col_idx] = self
+                                solution.assignWeek(row_idx, col_idx, self)
+                                break

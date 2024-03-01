@@ -1,47 +1,28 @@
 import random
 import time
-import fdb
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import tsSettings
 from TabuClasses import TSolutionInfo, Offer
 
 # Como achar o dia? Slot 10 -> 10 / 7 (Dia da semana) -> 10 MOD 7 (Slot daquele dia)
 
 
+connector = tsSettings.DatabaseConnector()
+utils = tsSettings.Utils()
+connector.connect()
 
-offers = []
-offers.append(Offer().assignOffer('1', 'Matemática', 'Wanderley'))
-offers.append(Offer().assignOffer('2', 'Matemática', 'Wanderley'))
-offers.append(Offer().assignOffer('3', 'Matemática', 'Wanderley'))
-offers.append(Offer().assignOffer('4', 'Matemática', 'Wanderley'))
-offers.append(Offer().assignOffer('5', 'Física', 'Jose'))
-offers.append(Offer().assignOffer('6', 'Física', 'Jose'))
-offers.append(Offer().assignOffer('7', 'Física', 'Jose'))
-offers.append(Offer().assignOffer('8', 'Física', 'Jose'))
-offers.append(Offer().assignOffer('9', 'Química', 'Maria' ))
-offers.append(Offer().assignOffer('10', 'Química', 'Maria'))
-offers.append(Offer().assignOffer('11', 'Biologia', 'Fernando'))
-offers.append(Offer().assignOffer('12', 'Biologia', 'Fernando'))
-offers.append(Offer().assignOffer('13', 'História', 'Fernando'))
-offers.append(Offer().assignOffer('14', 'História', 'Fernando'))
-offers.append(Offer().assignOffer('15', 'Artes', 'Maria'))
-offers.append(Offer().assignOffer('16', 'Artes', 'Maria'))
-offers.append(Offer().assignOffer('17', 'Economia', 'Raquel'))
-offers.append(Offer().assignOffer('18', 'Economia', 'Raquel'))
-offers.append(Offer().assignOffer('19', 'Sociologia', 'Fernando'))
-offers.append(Offer().assignOffer('20', 'Sociologia', 'Fernando'))
-offers.append(Offer().assignOffer('21', 'Programacao', 'Geovanna'))
-offers.append(Offer().assignOffer('22', 'Programacao', 'Geovanna'))
-offers.append(Offer().assignOffer('23', 'Programacao', 'Geovanna'))
-offers.append(Offer().assignOffer('24', 'Programacao', 'Geovanna'))
-offers.append(Offer().assignOffer('25', 'Estatistica', 'Myrella'))
-offers.append(Offer().assignOffer('28', 'Estatistica', 'Myrella'))
-offers.append(Offer().assignOffer('26', 'Estatistica', 'Myrella'))
+parameters = utils.get_parameters(connector)
+offers_data = utils.get_offers(connector)
 
 solution1 = TSolutionInfo()
 solution1.Id = 0
-Offer.assignOfferToClass(offers, solution1)
+
+for offer_row in offers_data:
+    offer = Offer()
+    offer.Id, offer.Disciplina, offer.Professor = offer_row
+    offer.assignOfferToClass(solution1)
 
 bestSolution = solution1
 
@@ -67,28 +48,11 @@ for i in range(1, numberOfIterations):
 print("Best Solution = ", bestSolution.Id)
 print("--- %s seconds ---" % (time.time() - start_time))
 
-def saveSolutionsToCSV(solutionArray, filename='solutions.csv'):
-    solutions_df = pd.DataFrame([solution.__dict__ for solution in solutionArray])
-    solutions_df.to_csv(filename, index=False)
-
-def createConnection():
-    try: 
-        conn = fdb.connect(
-            dsn='C:\\Users\\Jose\\Documents\\Code\\TimeTabling3.fdb',
-            user='SYSDBA',
-            password='horus163',
-            sql_dialect=3, charset='UTF8'
-        )
-        print("Connected to DB!")
-        return conn
-    except fdb.Error as e:
-        print(f"Error: {e}")
-        return None
     
 def main():
 
     print("Welcome to the Schedule Manager!")
-    createConnection()
+
     while True:
         print("\nMenu:")
         print("1. View Schedule of a Solution")
@@ -144,7 +108,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-    saveSolutionsToCSV(solutionArray)
 
 
 
