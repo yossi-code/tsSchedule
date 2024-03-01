@@ -104,7 +104,6 @@ class TSolutionInfo:
                 solution2 = TSolutionInfo()
                 solution2.useTabu = self.useTabu
                 print("Not in Tabu and Tabu = TRUE")
-                print(solution2.getTabuBool)
                 solution2.classSlots = [row.copy() for row in self.classSlots]
                 solution2.days_of_week = [
                     [day.copy() for day in turma]
@@ -121,7 +120,6 @@ class TSolutionInfo:
                 solution2 = TSolutionInfo()
                 solution2.useTabu = self.useTabu
                 print("Tabu = FALSE")
-                print(solution2.getTabuBool)
                 solution2.classSlots = [row.copy() for row in self.classSlots]
                 solution2.days_of_week = [
                     [day.copy() for day in turma]

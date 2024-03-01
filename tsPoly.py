@@ -1,5 +1,6 @@
 import random
 import time
+import fdb
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,7 +8,7 @@ from TabuClasses import TSolutionInfo, Offer
 
 # Como achar o dia? Slot 10 -> 10 / 7 (Dia da semana) -> 10 MOD 7 (Slot daquele dia)
 
-start_time = time.time()
+
 
 offers = []
 offers.append(Offer().assignOffer('1', 'Matemática', 'Wanderley'))
@@ -50,6 +51,7 @@ TSolutionInfo.getTabuBool(solution1)
 solutionArray = []
 bestSolutionCost = 0
 noImprovement = 0
+start_time = time.time()
 
 for i in range(1, numberOfIterations):
     solution = bestSolution.generateRandomSolutions()
@@ -69,9 +71,24 @@ def saveSolutionsToCSV(solutionArray, filename='solutions.csv'):
     solutions_df = pd.DataFrame([solution.__dict__ for solution in solutionArray])
     solutions_df.to_csv(filename, index=False)
 
+def createConnection():
+    try: 
+        conn = fdb.connect(
+            dsn='C:\\Users\\Jose\\Documents\\Code\\TimeTabling3.fdb',
+            user='SYSDBA',
+            password='horus163',
+            sql_dialect=3, charset='UTF8'
+        )
+        print("Connected to DB!")
+        return conn
+    except fdb.Error as e:
+        print(f"Error: {e}")
+        return None
+    
 def main():
 
     print("Welcome to the Schedule Manager!")
+    createConnection()
     while True:
         print("\nMenu:")
         print("1. View Schedule of a Solution")
