@@ -15,36 +15,15 @@ tabu_list = []
 class TSolutionInfo:
     Id = 0 
     cost = 0
-    incidentWeights = [10, 5, 1, 20, 3]
-    incidentCosts = [0] * len(incidentWeights)
-    classSlots = [[-1] * turmas for _ in range(slots)]
+    incident_weights = [0] * 5
+    incident_counter = [0] * len(incident_weights)
+    class_slots = [[-1] * turmas for _ in range(slots)]
     days_of_week = [
         [[-1] * 7 for _ in range(5)],
         [[-1] * 7 for _ in range(5)],
         [[-1] * 7 for _ in range(5)],
     ]
     useTabu = False
-
-    def getUserWeights(self):
-        userChoice = input(f"Enter Y for Default Weights or N for Custom")
-        if userChoice == 'Y':
-            print(self.incidentWeights)
-        if userChoice == 'N':
-            for i in range(len(self.incidentWeights)):
-                userInput = input(f"Enter the value for the Weight {i}: ")
-                self.incidentWeights[i] = int(userInput)
-            print(self.incidentWeights)
-
-    def getTabuBool(self):
-        tabuInput = input(f"Enter Y or N for Tabu").upper()
-        if tabuInput == 'Y':
-            self.useTabu = True
-            return True
-        elif tabuInput == 'N':
-            self.useTabu = False
-            return False
-        else: 
-            print("Invalid Input")
 
     def assignWeek(self, offer_index, Turma, Offer):
         self.days_of_week[Turma][offer_index // 7][offer_index % 7] = Offer
@@ -53,7 +32,7 @@ class TSolutionInfo:
         print(self.days_of_week[turma])
 
     def solutionCosts(self):
-        self.incidentCosts = [0 for _ in self.incidentCosts]
+        self.incident_counter = [0 for _ in self.incident_counter]
         # For each turma (3)
         for index_turma, turma in enumerate(self.days_of_week):
             # For i in range (5) - Week Days
@@ -66,26 +45,29 @@ class TSolutionInfo:
                     else:
                         self.empty_slots_count = 0
                     if self.empty_slots_count // 7 > 0:
-                        self.incidentCosts[0] += 1
-                        self.incidentCosts[2] -= 6
+                        self.incident_counter[0] += 1
+                        self.incident_counter[2] -= 6
                         self.empty_slots_count = 0
                     if self.empty_slots_count // 3 > 0:
-                        self.incidentCosts[1] += 1
-                        self.incidentCosts[2] -= 2
+                        self.incident_counter[1] += 1
+                        self.incident_counter[2] -= 2
                         self.empty_slots_count = 0
                     if self.empty_slots_count // 2 > 0:
-                        self.incidentCosts[4] += 1
-                        self.incidentCosts[2] -= 1
+                        self.incident_counter[4] += 1
+                        self.incident_counter[2] -= 1
                         self.empty_slots_count = 0
                     if self.empty_slots_count // 1 > 0:
-                        self.incidentCosts[2] += 1
+                        self.incident_counter[2] += 1
                     
         self.checkProfessorSchedule()
-        self.cost = sum([count * weight for count, weight in zip(self.incidentCosts, self.incidentWeights)])
+        self.cost = sum([count * weight for count, weight in zip(self.incident_counter, self.incident_weights)])
         return(self.cost)
     
+    def get_tabu_list(self):
+        return tabu_list
+    
     def printSolution(self):
-        for row in self.classSlots:
+        for row in self.class_slots:
             for slot in row:
                 if slot != -1:
                     print(slot.Id, end=' ')
@@ -95,58 +77,52 @@ class TSolutionInfo:
 
     def generateRandomSolutions(self):
         while True:
-            row_idx1 = random.randint(0, len(self.classSlots)-1)
-            col_idx1 = random.randint(0, len(self.classSlots[0])-1) 
-            row_idx2 = random.randint(0, len(self.classSlots)-1)
-            col_idx2 = random.randint(0, len(self.classSlots[0])-1)
+            row_idx1 = random.randint(0, len(self.class_slots)-1)
+            col_idx1 = random.randint(0, len(self.class_slots[0])-1) 
+            row_idx2 = random.randint(0, len(self.class_slots)-1)
+            col_idx2 = random.randint(0, len(self.class_slots[0])-1)
 
-            if (row_idx1, col_idx1, row_idx2, col_idx2) not in tabu_list and self.useTabu == True:
-                solution2 = TSolutionInfo()
-                solution2.useTabu = self.useTabu
-                print("Not in Tabu and Tabu = TRUE")
-                solution2.classSlots = [row.copy() for row in self.classSlots]
-                solution2.days_of_week = [
-                    [day.copy() for day in turma]
-                    for turma in self.days_of_week
-                ]
-                solution2.classSlots[row_idx1][col_idx1], solution2.classSlots[row_idx2][col_idx2] = \
-                solution2.classSlots[row_idx2][col_idx2], solution2.classSlots[row_idx1][col_idx1]
-                solution2.assignWeek(row_idx1, col_idx1, solution2.classSlots[row_idx1][col_idx1])
-                solution2.assignWeek(row_idx2, col_idx2, solution2.classSlots[row_idx2][col_idx2])
+            # Check if the solution is in the tabu list
+            in_tabu_list = (row_idx1, col_idx1, row_idx2, col_idx2) in tabu_list
+
+            if in_tabu_list and self.useTabu:
+                print("Solution is in Tabu list. Generating a new solution.")
+                continue
+
+            solution2 = TSolutionInfo()
+            solution2.incident_weights = self.incident_weights
+            solution2.useTabu = self.useTabu
+            solution2.class_slots = [row.copy() for row in self.class_slots]
+            solution2.days_of_week = [
+                [day.copy() for day in turma]
+                for turma in self.days_of_week
+            ]
+            solution2.class_slots[row_idx1][col_idx1], solution2.class_slots[row_idx2][col_idx2] = \
+                solution2.class_slots[row_idx2][col_idx2], solution2.class_slots[row_idx1][col_idx1]
+            solution2.assignWeek(row_idx1, col_idx1, solution2.class_slots[row_idx1][col_idx1])
+            solution2.assignWeek(row_idx2, col_idx2, solution2.class_slots[row_idx2][col_idx2])
+
+            # Add the solution to the tabu list
+            if self.useTabu:
                 self.addTabuList(row_idx1, col_idx1, row_idx2, col_idx2)
                 self.addTabuList(row_idx2, col_idx2, row_idx1, col_idx1)
-                return solution2
-            elif (self.useTabu == False):
-                solution2 = TSolutionInfo()
-                solution2.useTabu = self.useTabu
-                print("Tabu = FALSE")
-                solution2.classSlots = [row.copy() for row in self.classSlots]
-                solution2.days_of_week = [
-                    [day.copy() for day in turma]
-                    for turma in self.days_of_week
-                ]
-                solution2.classSlots[row_idx1][col_idx1], solution2.classSlots[row_idx2][col_idx2] = \
-                solution2.classSlots[row_idx2][col_idx2], solution2.classSlots[row_idx1][col_idx1]
-                solution2.assignWeek(row_idx1, col_idx1, solution2.classSlots[row_idx1][col_idx1])
-                solution2.assignWeek(row_idx2, col_idx2, solution2.classSlots[row_idx2][col_idx2])
-                return solution2
+
+            return solution2, in_tabu_list
 
     def addTabuList(self, row1, col1, row2, col2):
         tabu_list.append((row1, col1, row2, col2))
-        while len(tabu_list) > 20:
+        while len(tabu_list) > 10:
             tabu_list.pop(0)
-            tabu_list.pop(0)
-
 
 
     def checkAssignBestSolution(solution1, solution2):
         if (solution2.solutionCosts() < solution1.solutionCosts()):
-            print('S1 Cost: ', solution1.solutionCosts())
-            print('S2 Cost: ', solution2.solutionCosts())
+            #print('S1 Cost: ', solution1.solutionCosts())
+            #print('S2 Cost: ', solution2.solutionCosts())
             return solution2
         else:
-            print('S1 Cost: ', solution1.solutionCosts())
-            print('S2 Cost: ', solution2.solutionCosts())
+            #print('S1 Cost: ', solution1.solutionCosts())
+            #print('S2 Cost: ', solution2.solutionCosts())
             return solution1
         
     def printSchedule(self):
@@ -168,8 +144,8 @@ class TSolutionInfo:
                 table_data.append(day_schedule)
 
             print(tabulate(table_data, headers=["Day", "Slot 1", "Slot 2", "Slot 3", "Slot 4", "Slot 5", "Slot 6", "Slot 7"], tablefmt="pretty"))
-            print(self.incidentCosts)
-            print(self.incidentWeights)
+            print(self.incident_counter)
+            print(self.incident_weights)
             print("Solution Cost: ", self.solutionCosts())
     
     def checkProfessorSchedule(self):
@@ -181,10 +157,9 @@ class TSolutionInfo:
                     if slot != -1:
                         professor = slot.Professor
                         professor_key = (professor, day_idx, slot_idx)  # Use tuple as the key
-
                         if professor_key in professor_slots:
                             professor_slots[professor_key].append(turma_idx)
-                            self.incidentCosts[3] += 1
+                            self.incident_counter[3] += 1
                         else:
                             professor_slots[professor_key] = [turma_idx]
 
@@ -193,7 +168,7 @@ class TSolutionInfo:
             if len(turmas) > 1:
                 professor, day_idx, slot_idx = professor_key
                 day_display, slot_display = day_idx +1, slot_idx +1
-                print(f"Professor {professor} is assigned to Day {day_display}, Slot {slot_display} in Turmas: {turmas}")
+                #print(f"Professor {professor} is assigned to Day {day_display}, Slot {slot_display} in Turmas: {turmas}")
 
     def swapSlotsManually(self, turma1, day1, slot1, turma2, day2, slot2):
         if turma1 not in range(len(self.days_of_week)) or turma2 not in range(len(self.days_of_week)):
@@ -220,17 +195,17 @@ class Offer:
         self.Professor = Professor
         self.Id = Id
         print("Offer assigned, this is the Offer ID:", Id)
-        return self  # Return the modified instance of the class
+        return self
     
     def assignOfferToClass(self, solution):
-        num_rows = len(solution.classSlots)
-        num_cols = len(solution.classSlots[0])
+        num_rows = len(solution.class_slots)
+        num_cols = len(solution.class_slots[0])
 
         for col_idx in range(num_cols):
                 for row_idx in range(num_rows):
-                        slot = solution.classSlots[row_idx][col_idx]
+                        slot = solution.class_slots[row_idx][col_idx]
                         if slot == -1:
                         # Assign the offer to the class slot
-                                solution.classSlots[row_idx][col_idx] = self
+                                solution.class_slots[row_idx][col_idx] = self
                                 solution.assignWeek(row_idx, col_idx, self)
                                 break

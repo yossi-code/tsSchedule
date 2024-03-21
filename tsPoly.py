@@ -13,37 +13,79 @@ connector = tsSettings.DatabaseConnector()
 utils = tsSettings.Utils()
 connector.connect()
 
-parameters = utils.get_parameters(connector)
+#parameters_data = utils.get_parameters(connector)
 offers_data = utils.get_offers(connector)
 
 solution1 = TSolutionInfo()
 solution1.Id = 0
 
+def get_user_weights(solution, connector):
+    user_choice = input(f"Enter Y for Default Parameters or N for Custom")
+    if user_choice.upper() == 'Y':
+        weights = utils.get_parameter_weights(1, connector)
+        tabu_choice, = utils.get_parameter_tabu(1, connector)
+        if weights:
+            solution.incident_weights = list(weights[0])
+            print("Default weights: ", solution.incident_weights)
+        if tabu_choice[0]:
+            solution.useTabu = True
+        else:
+            print("Error assigning default weights/tabu")
+    if user_choice == 'N':
+        for i in range(len(solution.incidentWeights)):
+            userInput = input(f"Enter the value for the Weight {i}: ")
+            solution.incidentWeights[i] = int(userInput)
+        print(solution.incidentWeights)
+
+def visualize_local_search(solution_array, tabu_list_points):
+    solution_costs = [solution.cost for solution in solution_array]
+
+    plt.plot(range(1, len(solution_costs) + 1), solution_costs, marker='o', label='Solution Cost')
+    
+    if tabu_list_points:
+        plt.scatter(tabu_list_points, [solution.cost for solution in solution_array if solution.in_tabu_list],
+                    color='red', label='In Tabu List')
+
+    plt.xlabel('Iteration')
+    plt.ylabel('Solution Cost')
+    plt.title('Local Search Graph')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
 for offer_row in offers_data:
     offer = Offer()
-    offer.Id, offer.Disciplina, offer.Professor = offer_row
+    offer.Id = offer_row[0]
+    offer.Disciplina = offer_row[3]
+    offer.Professor = offer_row[4]
     offer.assignOfferToClass(solution1)
+
+get_user_weights(solution1, connector)
 
 bestSolution = solution1
 
-numberOfIterations = int(input("Number of Iterations?\n"))
-TSolutionInfo.getUserWeights(solution1)
-TSolutionInfo.getTabuBool(solution1)
-solutionArray = []
+number_iterations = int(input("Number of Iterations?\n"))
+solution_array = []
+tabu_list_points = []
 bestSolutionCost = 0
 noImprovement = 0
 start_time = time.time()
 
-for i in range(1, numberOfIterations):
-    solution = bestSolution.generateRandomSolutions()
+
+for i in range(1, number_iterations):
+    solution, in_tabu_list = bestSolution.generateRandomSolutions()
+    if in_tabu_list:
+        tabu_list_points.append(i)
     solution.Id = i
     bestSolution = TSolutionInfo.checkAssignBestSolution(bestSolution, solution)
     bestSolutionCost = bestSolution.cost
     if bestSolutionCost < solution.cost:
         noImprovement += 1
-    solutionArray.append(solution)
-    if noImprovement > 200:
+    solution_array.append(solution)
+    if noImprovement > 250:
         break
+
+visualize_local_search(solution_array, tabu_list_points)
 
 print("Best Solution = ", bestSolution.Id)
 print("--- %s seconds ---" % (time.time() - start_time))
@@ -64,22 +106,22 @@ def main():
 
         if choice == "1":
             print("Select a solution to view the schedule:")
-            for i, solution in enumerate(solutionArray):
+            for i, solution in enumerate(solution_array):
                 print(f"{i + 1}. Solution {solution.Id} - Cost: {solution.cost}")
             try:
                 selected_solution_index = int(input("Enter the solution number: ")) - 1
-                selected_solution = solutionArray[selected_solution_index]
+                selected_solution = solution_array[selected_solution_index]
                 selected_solution.printSchedule()
             except (ValueError, IndexError):
                 print("Invalid input. Please try again.")
 
         elif choice == "2":
             print("Select a solution to swap slots:")
-            for i, solution in enumerate(solutionArray):
+            for i, solution in enumerate(solution_array):
                 print(f"{i + 1}. Solution {solution.Id}")
             try:
                 selected_solution_index = int(input("Enter the solution number: ")) - 1
-                selected_solution = solutionArray[selected_solution_index]
+                selected_solution = solution_array[selected_solution_index]
                 selected_solution.printSchedule()
                 print("Select the first slot you wanna change (Turma, Day and Slot)")
                 turma1 = int(input("Turma: ")) -1
@@ -96,7 +138,7 @@ def main():
         elif choice == "3":
             # Check professor schedule
             selected_solution_index = int(input("Enter the solution number: ")) - 1
-            selected_solution = solutionArray[selected_solution_index]
+            selected_solution = solution_array[selected_solution_index]
             selected_solution.checkProfessorSchedule()
 
         elif choice == "4":
