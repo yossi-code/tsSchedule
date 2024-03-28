@@ -15,25 +15,19 @@ connector.connect()
 
 #parameters_data = utils.get_parameters(connector)
 offers_data = utils.get_offers(connector)
+random.shuffle(offers_data)
 
 
-'''
-def visualize_local_search(solution_array, tabu_list_points):
+def visualize_local_search(solution_array):
     solution_costs = [solution.cost for solution in solution_array]
-
     plt.plot(range(1, len(solution_costs) + 1), solution_costs, marker='o', label='Solution Cost')
-    
-    if tabu_list_points:
-        plt.scatter(tabu_list_points, [solution.cost for solution in solution_array if solution.in_tabu_list],
-                    color='red', label='In Tabu List')
-
     plt.xlabel('Iteration')
     plt.ylabel('Solution Cost')
     plt.title('Local Search Graph')
     plt.legend()
     plt.grid(True)
     plt.show()
-''' 
+
 
 turmas = int(input("Number of Turmas?\n"))
 number_iterations = int(input("Number of Iterations?\n"))
@@ -76,7 +70,6 @@ get_user_weights(solution1, connector)
 bestSolution = solution1
 
 solution_array = []
-tabu_list_points = []
 bestSolutionCost = 0
 noImprovement = 0
 start_time = time.time()
@@ -84,8 +77,6 @@ start_time = time.time()
 
 for i in range(1, number_iterations):
     solution, in_tabu_list = bestSolution.generateRandomSolutions()
-#    if in_tabu_list:
-#        tabu_list_points.append(i)
     solution.Id = i
     bestSolution = TSolutionInfo.checkAssignBestSolution(bestSolution, solution)
     bestSolutionCost = bestSolution.cost
@@ -95,12 +86,13 @@ for i in range(1, number_iterations):
     if noImprovement > 500:
         break
 
-#visualize_local_search(solution_array, tabu_list_points)
+
 
 print("Best Solution = ", bestSolution.Id)
+print("Best Cost: ", bestSolution.cost)
 print("--- %s seconds ---" % (time.time() - start_time))
 
-    
+
 def main():
 
     print("Welcome to the Schedule Manager!")
@@ -110,9 +102,10 @@ def main():
         print("1. View Schedule of a Solution")
         print("2. Manually Swap Slots")
         print("3. Check Professor Collision")
-        print("4. Exit")
+        print("4. View Graph")
+        print("5. Exit")
 
-        choice = input("Enter your choice (1/2/3/4): ")
+        choice = input("Enter your choice (1/2/3/4/5): ")
 
         if choice == "1":
             print("Select a solution to view the schedule:")
@@ -150,11 +143,15 @@ def main():
             selected_solution_index = int(input("Enter the solution number: ")) - 1
             selected_solution = solution_array[selected_solution_index]
             selected_solution.checkProfessorSchedule()
-
+        
         elif choice == "4":
-            print("Exiting the Schedule Manager. Goodbye!")
+            visualize_local_search(solution_array)
             break
 
+        elif choice == "5":
+            print("Exiting the Schedule Manager. Goodbye!")
+            break
+        
         else:
             print("Invalid choice. Please try again.")
 

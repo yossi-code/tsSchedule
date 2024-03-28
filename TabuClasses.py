@@ -171,7 +171,7 @@ class TSolutionInfo:
             if len(turmas) > 1:
                 professor, day_idx, slot_idx = professor_key
                 day_display, slot_display = day_idx +1, slot_idx +1
-                #print(f"Professor {professor} is assigned to Day {day_display}, Slot {slot_display} in Turmas: {turmas}")
+                print(f"Professor {professor} is assigned to Day {day_display}, Slot {slot_display} in Turmas: {turmas}")
 
     def swapSlotsManually(self, turma1, day1, slot1, turma2, day2, slot2):
         if turma1 not in range(len(self.days_of_week)) or turma2 not in range(len(self.days_of_week)):
