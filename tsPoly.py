@@ -16,7 +16,29 @@ connector.connect()
 #parameters_data = utils.get_parameters(connector)
 offers_data = utils.get_offers(connector)
 
-solution1 = TSolutionInfo()
+
+'''
+def visualize_local_search(solution_array, tabu_list_points):
+    solution_costs = [solution.cost for solution in solution_array]
+
+    plt.plot(range(1, len(solution_costs) + 1), solution_costs, marker='o', label='Solution Cost')
+    
+    if tabu_list_points:
+        plt.scatter(tabu_list_points, [solution.cost for solution in solution_array if solution.in_tabu_list],
+                    color='red', label='In Tabu List')
+
+    plt.xlabel('Iteration')
+    plt.ylabel('Solution Cost')
+    plt.title('Local Search Graph')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+''' 
+
+turmas = int(input("Number of Turmas?\n"))
+number_iterations = int(input("Number of Iterations?\n"))
+
+solution1 = TSolutionInfo(turmas)
 solution1.Id = 0
 
 def get_user_weights(solution, connector):
@@ -37,23 +59,12 @@ def get_user_weights(solution, connector):
             solution.incidentWeights[i] = int(userInput)
         print(solution.incidentWeights)
 
-def visualize_local_search(solution_array, tabu_list_points):
-    solution_costs = [solution.cost for solution in solution_array]
+max_offers = turmas * 35
 
-    plt.plot(range(1, len(solution_costs) + 1), solution_costs, marker='o', label='Solution Cost')
-    
-    if tabu_list_points:
-        plt.scatter(tabu_list_points, [solution.cost for solution in solution_array if solution.in_tabu_list],
-                    color='red', label='In Tabu List')
+for idx, offer_row in enumerate(offers_data):
+    if idx >= max_offers:
+        break
 
-    plt.xlabel('Iteration')
-    plt.ylabel('Solution Cost')
-    plt.title('Local Search Graph')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-for offer_row in offers_data:
     offer = Offer()
     offer.Id = offer_row[0]
     offer.Disciplina = offer_row[3]
@@ -64,7 +75,6 @@ get_user_weights(solution1, connector)
 
 bestSolution = solution1
 
-number_iterations = int(input("Number of Iterations?\n"))
 solution_array = []
 tabu_list_points = []
 bestSolutionCost = 0
@@ -74,18 +84,18 @@ start_time = time.time()
 
 for i in range(1, number_iterations):
     solution, in_tabu_list = bestSolution.generateRandomSolutions()
-    if in_tabu_list:
-        tabu_list_points.append(i)
+#    if in_tabu_list:
+#        tabu_list_points.append(i)
     solution.Id = i
     bestSolution = TSolutionInfo.checkAssignBestSolution(bestSolution, solution)
     bestSolutionCost = bestSolution.cost
     if bestSolutionCost < solution.cost:
         noImprovement += 1
     solution_array.append(solution)
-    if noImprovement > 250:
+    if noImprovement > 500:
         break
 
-visualize_local_search(solution_array, tabu_list_points)
+#visualize_local_search(solution_array, tabu_list_points)
 
 print("Best Solution = ", bestSolution.Id)
 print("--- %s seconds ---" % (time.time() - start_time))
@@ -107,7 +117,7 @@ def main():
         if choice == "1":
             print("Select a solution to view the schedule:")
             for i, solution in enumerate(solution_array):
-                print(f"{i + 1}. Solution {solution.Id} - Cost: {solution.cost}")
+                print(f"{i + 1}. Solution {solution.Id} - Cost: {solution.cost} - Tabu: {solution.tabu_flag}")
             try:
                 selected_solution_index = int(input("Enter the solution number: ")) - 1
                 selected_solution = solution_array[selected_solution_index]

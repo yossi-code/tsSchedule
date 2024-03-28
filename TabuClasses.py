@@ -2,7 +2,6 @@ import random
 from tabulate import tabulate
 
 slots = 35
-turmas = 3
 tabu_list = []
 
 
@@ -13,20 +12,22 @@ tabu_list = []
 # F4 = Buraco 2 (2 slots)  Peso -> 3
 
 class TSolutionInfo:
-    Id = 0 
-    cost = 0
-    incident_weights = [0] * 5
-    incident_counter = [0] * len(incident_weights)
-    class_slots = [[-1] * turmas for _ in range(slots)]
-    days_of_week = [
-        [[-1] * 7 for _ in range(5)],
-        [[-1] * 7 for _ in range(5)],
-        [[-1] * 7 for _ in range(5)],
-    ]
-    useTabu = False
+    def __init__(self, turmas):
+        self.Id = 0 
+        self.cost = 0
+        self.turmas = turmas
+        self.tabu_flag = False
+        self.incident_weights = [0] * 5
+        self.incident_counter = [0] * len(self.incident_weights)
+        self.class_slots = [[-1] * self.turmas for _ in range(slots)]
+        self.days_of_week = [
+            [[-1] * 7 for _ in range(5)] for _ in range(self.turmas)
+        ]
+        self.useTabu = True
 
     def assignWeek(self, offer_index, Turma, Offer):
         self.days_of_week[Turma][offer_index // 7][offer_index % 7] = Offer
+        print("Turma Assigned", Turma)
 
     def printWeekDay(self, turma):
         print(self.days_of_week[turma])
@@ -82,14 +83,15 @@ class TSolutionInfo:
             row_idx2 = random.randint(0, len(self.class_slots)-1)
             col_idx2 = random.randint(0, len(self.class_slots[0])-1)
 
-            # Check if the solution is in the tabu list
             in_tabu_list = (row_idx1, col_idx1, row_idx2, col_idx2) in tabu_list
 
             if in_tabu_list and self.useTabu:
                 print("Solution is in Tabu list. Generating a new solution.")
-                continue
+                print("ID = ", self.Id)
+                print("Tabu: ", row_idx1, col_idx1, row_idx2, col_idx2)
+                self.tabu_flag = True
 
-            solution2 = TSolutionInfo()
+            solution2 = TSolutionInfo(self.turmas)
             solution2.incident_weights = self.incident_weights
             solution2.useTabu = self.useTabu
             solution2.class_slots = [row.copy() for row in self.class_slots]
@@ -111,7 +113,7 @@ class TSolutionInfo:
 
     def addTabuList(self, row1, col1, row2, col2):
         tabu_list.append((row1, col1, row2, col2))
-        while len(tabu_list) > 10:
+        while len(tabu_list) > 50:
             tabu_list.pop(0)
 
 
@@ -127,7 +129,7 @@ class TSolutionInfo:
         
     def printSchedule(self):
         week_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-        turma_labels = ["Turma 1", "Turma 2", "Turma 3"]
+        turma_labels = [f"Turma {i+1}" for i in range(self.turmas)]
 
         for turma_idx, turma in enumerate(self.days_of_week):
             print(f"\n{turma_labels[turma_idx]} Schedule:\n")
@@ -147,6 +149,7 @@ class TSolutionInfo:
             print(self.incident_counter)
             print(self.incident_weights)
             print("Solution Cost: ", self.solutionCosts())
+            print("Tabu: ", self.tabu_flag)
     
     def checkProfessorSchedule(self):
         professor_slots = {}

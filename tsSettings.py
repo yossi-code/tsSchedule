@@ -36,10 +36,10 @@ class DatabaseConnector:
             print(f"Error executing query: {e}")
             return None
 
-    def execute_update(self, query, offer):
+    def execute_update(self, query, parameters=None):
         try:
             cursor = self.connection.cursor()
-            cursor.execute(query, offer)
+            cursor.execute(query, parameters)
             self.connection.commit()
             cursor.close()
             print("Update successful.")
@@ -73,8 +73,10 @@ class Utils:
             print("There was an error getting the tabu parameter")
     
     def get_offers(self, connector):
-        query = 'SELECT s."id" , s."idTeacher", s."idDiscipline", \
-            d."acronym" , t."initials" FROM "LecturesOffers" s JOIN "Disciplines" d ON s."idDiscipline"  = d."id" JOIN "Teachers" t ON s."idTeacher" = t."id" '
+        query = 'SELECT s."id", s."idTeacher", s."idDiscipline", \
+            d."acronym", t."initials" FROM "LecturesOffers" s JOIN "Disciplines" d ON s."idDiscipline" = d."id" \
+            JOIN "Teachers" t ON s."idTeacher" = t."id" \
+            ORDER BY s."idTeacher"'
         result = connector.execute_query(query)
         if result:
             return result
@@ -95,10 +97,14 @@ def main():
     #if result:
     #    print("Query result:", result)
 
+    id_value = 18
+
     # update execution
-    #for offer in offers_data:
-    #    update_query = "INSERT INTO TABUSEARCHOFFERS (ID, Subject, Professor) VALUES (?, ?, ?)"
-    #    connector.execute_update(update_query, offer)
+    for id_teacher in range(101, 180):
+        for id_discipline in range(13, 92):
+            insert_query = 'INSERT INTO "LecturesOffers" ("id", "idTeacher", "idDiscipline") VALUES (?, ?, ?)'
+            connector.execute_update(insert_query, (id_value, id_teacher, id_discipline))
+            id_value += 1
 
     connector.disconnect()
 
