@@ -1,4 +1,5 @@
 import fdb
+import random
 
 class DatabaseConnector:
     def __init__(self):
@@ -75,21 +76,50 @@ class Utils:
     def get_offers(self, connector):
         query = 'SELECT s."id", s."idTeacher", s."idDiscipline", \
             d."acronym", t."initials" FROM "LecturesOffers" s JOIN "Disciplines" d ON s."idDiscipline" = d."id" \
-            JOIN "Teachers" t ON s."idTeacher" = t."id" \
-            ORDER BY s."idTeacher"'
+            JOIN "Teachers" t ON s."idTeacher" = t."id" WHERE s."idTeacher" BETWEEN 101 AND 179 OR s."idTeacher" BETWEEN 301 AND 372 \
+            ORDER BY s."idTeacher" '
         result = connector.execute_query(query)
         if result:
             return result
         else:
             print("There was an error getting offers!!")
 
+    def get_teacher_availability(self, connector):
+        query = "SELECT teacher_id, day_of_week, slot FROM teacher_availability"
+        availability_data = connector.execute_query(query)
+        print("Got availability data!")
+        return availability_data
+    
 
 def main():
     connector = DatabaseConnector()
     connector.connect()
 
-    Utils.get_parameters(Utils, connector)
-    Utils.get_parameter_weights(Utils, 1, connector)
+    utils = Utils()
+
+    slots = utils.get_teacher_availability(connector)
+    slots_to_delete = {}
+
+    for teacher_id, day_of_week, slot in slots:
+        if teacher_id not in slots_to_delete:
+            slots_to_delete[teacher_id] = []
+        slots_to_delete[teacher_id].append((day_of_week, slot))
+
+    delete_queries = []
+    for teacher_id, slots in slots_to_delete.items():
+        random.shuffle(slots)
+        half_count = len(slots) // 2
+        for day_of_week, slot in slots[:half_count]:
+            delete_queries.append(f"DELETE FROM teacher_availability WHERE teacher_id = {teacher_id} AND day_of_week = {day_of_week} AND slot = {slot}")
+
+    for query in delete_queries:
+        connector.execute_update(query)
+
+    print("Done! Queries deleted!")
+    
+
+    #Utils.get_parameters(Utils, connector)
+    #Utils.get_parameter_weights(Utils, 1, connector)
 
     # query execution
     #query = "SELECT * FROM TABUSEARCHPARAMETERS"
@@ -97,16 +127,37 @@ def main():
     #if result:
     #    print("Query result:", result)
 
-    id_value = 18
-
     # update execution
-    for id_teacher in range(101, 180):
-        for id_discipline in range(13, 92):
-            insert_query = 'INSERT INTO "LecturesOffers" ("id", "idTeacher", "idDiscipline") VALUES (?, ?, ?)'
-            connector.execute_update(insert_query, (id_value, id_teacher, id_discipline))
-            id_value += 1
+    #for id_teacher in range(101, 180):
+    #    for id_discipline in range(13, 92):
+    #        insert_query = 'INSERT INTO "LecturesOffers" ("id", "idTeacher", "idDiscipline") VALUES (?, ?, ?)'
+    #        connector.execute_update(insert_query, (id_value, id_teacher, id_discipline))
+    #        id_value += 1
 
-    connector.disconnect()
+    # Define teacher ranges
+    #teacher_ranges = [(101, 179), (301, 372)]
+
+    # Generate availability data for all slots for each teacher
+    #availability_data = []
+
+    #for start_id, end_id in teacher_ranges:
+     #   for teacher_id in range(start_id, end_id + 1):
+      #      for day_of_week in range(5):  # Assuming 5 days in a week (0-4)
+       #         for slot in range(7):     # Assuming 7 slots in a day (0-6)
+        #            availability_data.append((teacher_id, day_of_week, slot))
+
+    # Insert availability data into the database
+    #for entry in availability_data:
+     #   teacher_id, day_of_week, slot = entry
+      #  connector.execute_update('''
+       #     INSERT INTO teacher_availability (teacher_id, day_of_week, slot)
+        #    VALUES (?, ?, ?)
+        #''', (teacher_id, day_of_week, slot))
+
+
+
+    # Close the connection
+    connector.disconnect
 
 if __name__ == "__main__":
     main()

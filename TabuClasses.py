@@ -3,6 +3,7 @@ from tabulate import tabulate
 
 slots = 35
 tabu_list = []
+tabu_tenure = 200
 
 
 # F0 = Dia vago (7 slots)  Peso -> 10
@@ -12,11 +13,11 @@ tabu_list = []
 # F4 = Buraco 2 (2 slots)  Peso -> 3
 
 class TSolutionInfo:
-    def __init__(self, turmas):
+    def __init__(self, turmas, teacher_availability=None):
         self.Id = 0 
         self.cost = 0
         self.turmas = turmas
-        self.tabu_flag = False
+        self.tabu_flag = 0
         self.incident_weights = [0] * 5
         self.incident_counter = [0] * len(self.incident_weights)
         self.class_slots = [[-1] * self.turmas for _ in range(slots)]
@@ -24,6 +25,7 @@ class TSolutionInfo:
             [[-1] * 7 for _ in range(5)] for _ in range(self.turmas)
         ]
         self.useTabu = True
+        self.teacher_availability = teacher_availability
 
     def assignWeek(self, offer_index, Turma, Offer):
         self.days_of_week[Turma][offer_index // 7][offer_index % 7] = Offer
@@ -77,7 +79,31 @@ class TSolutionInfo:
             print()
 
     def generateRandomSolutions(self):
-        while True:
+        max_attempts = 1000
+        attempts = 0
+        
+        def is_valid_move(slot1_teacher, slot2_teacher, col_idx1, col_idx2):
+            day1, slot1 = divmod(col_idx1, 7)
+            day2, slot2 = divmod(col_idx2, 7)
+
+            def check_availability(teacher, day, slot):
+                if teacher in self.teacher_availability:
+                    day_slots = self.teacher_availability[teacher].get(day, [])
+                    if len(day_slots) > slot:
+                        return day_slots[slot]
+                return False
+
+            valid_for_teacher1 = (slot1_teacher is None or check_availability(slot1_teacher, day2, slot2))
+            valid_for_teacher2 = (slot2_teacher is None or check_availability(slot2_teacher, day1, slot1))
+
+            print("Valid 1: ", valid_for_teacher1)
+            print("Valid 2: ", valid_for_teacher2)
+        
+            return (valid_for_teacher1 and valid_for_teacher2)
+
+        while attempts < max_attempts:
+            attempts += 1
+
             row_idx1 = random.randint(0, len(self.class_slots)-1)
             col_idx1 = random.randint(0, len(self.class_slots[0])-1) 
             row_idx2 = random.randint(0, len(self.class_slots)-1)
@@ -85,13 +111,9 @@ class TSolutionInfo:
 
             in_tabu_list = (row_idx1, col_idx1, row_idx2, col_idx2) in tabu_list
 
-            if in_tabu_list and self.useTabu:
-                print("Solution is in Tabu list. Generating a new solution.")
-                print("ID = ", self.Id)
-                print("Tabu: ", row_idx1, col_idx1, row_idx2, col_idx2)
-                self.tabu_flag = True
+            print("In tabu list:", in_tabu_list)
 
-            solution2 = TSolutionInfo(self.turmas)
+            solution2 = TSolutionInfo(self.turmas, self.teacher_availability)
             solution2.incident_weights = self.incident_weights
             solution2.useTabu = self.useTabu
             solution2.class_slots = [row.copy() for row in self.class_slots]
@@ -99,21 +121,43 @@ class TSolutionInfo:
                 [day.copy() for day in turma]
                 for turma in self.days_of_week
             ]
-            solution2.class_slots[row_idx1][col_idx1], solution2.class_slots[row_idx2][col_idx2] = \
+
+            slot1_teacher = solution2.class_slots[row_idx1][col_idx1].IdProfessor if solution2.class_slots[row_idx1][col_idx1] != -1 else None
+            slot2_teacher = solution2.class_slots[row_idx2][col_idx2].IdProfessor if solution2.class_slots[row_idx2][col_idx2] != -1 else None
+            if in_tabu_list and self.useTabu:
+                #print("Solution is in Tabu list. Generating a new solution.")
+                #print("ID = ", self.Id)
+                #print("Tabu: ", row_idx1, col_idx1, row_idx2, col_idx2)
+                self.tabu_flag += 1
+                continue
+                #should be solution 2 flag, can solve by turning into a function and returning true or false if not in_tabu_list
+
+            #print("Teacher availability data type:", type(self.teacher_availability))
+            #print("Specific teacher data:", self.teacher_availability.get(slot1_teacher))
+            #print("Teacher 1, 2: ", slot1_teacher, slot2_teacher)
+
+            if is_valid_move(slot1_teacher, slot2_teacher, col_idx1, col_idx2):
+                solution2.class_slots[row_idx1][col_idx1], solution2.class_slots[row_idx2][col_idx2] = \
                 solution2.class_slots[row_idx2][col_idx2], solution2.class_slots[row_idx1][col_idx1]
-            solution2.assignWeek(row_idx1, col_idx1, solution2.class_slots[row_idx1][col_idx1])
-            solution2.assignWeek(row_idx2, col_idx2, solution2.class_slots[row_idx2][col_idx2])
+                solution2.assignWeek(row_idx1, col_idx1, solution2.class_slots[row_idx1][col_idx1])
+                solution2.assignWeek(row_idx2, col_idx2, solution2.class_slots[row_idx2][col_idx2])
 
-            # Add the solution to the tabu list
-            if self.useTabu:
-                self.addTabuList(row_idx1, col_idx1, row_idx2, col_idx2)
-                self.addTabuList(row_idx2, col_idx2, row_idx1, col_idx1)
+                if self.useTabu:
+                    self.addTabuList(row_idx1, col_idx1, row_idx2, col_idx2)
+                    print("Added Tabu List")
 
-            return solution2, in_tabu_list
-
+                return solution2
+            else:
+                print("Invalid Move")
+                print("Attempts: ", attempts)
+                print("Tabu List: ", tabu_list)
+            
+            #raise Exception("Ops, loop!")
+        
     def addTabuList(self, row1, col1, row2, col2):
         tabu_list.append((row1, col1, row2, col2))
-        while len(tabu_list) > 50:
+        tabu_list.append((row2, col2, row1, col1))
+        while len(tabu_list) > tabu_tenure:
             tabu_list.pop(0)
 
 
@@ -166,7 +210,6 @@ class TSolutionInfo:
                         else:
                             professor_slots[professor_key] = [turma_idx]
 
-        # Print the professors assigned to the same day and slot in different turmas
         for professor_key, turmas in professor_slots.items():
             if len(turmas) > 1:
                 professor, day_idx, slot_idx = professor_key
@@ -192,11 +235,13 @@ class Offer:
         self.Disciplina = ''
         self.Professor = ''
         self.Id = 0
+        self.IdProfessor = 0
 
-    def assignOffer(self, Id, Disciplina, Professor):
+    def assignOffer(self, Id, Disciplina, Professor, IdProfessor):
         self.Disciplina = Disciplina
         self.Professor = Professor
         self.Id = Id
+        self.IdProfessor = IdProfessor
         print("Offer assigned, this is the Offer ID:", Id)
         return self
     
