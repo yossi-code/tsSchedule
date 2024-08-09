@@ -13,7 +13,7 @@ tabu_tenure = 200
 # F4 = Buraco 2 (2 slots)  Peso -> 3
 
 class TSolutionInfo:
-    def __init__(self, turmas, teacher_availability=None):
+    def __init__(self, turmas, teacher_availability=None, tabu_tenure=200):
         self.Id = 0 
         self.cost = 0
         self.turmas = turmas
@@ -26,6 +26,7 @@ class TSolutionInfo:
         ]
         self.useTabu = True
         self.teacher_availability = teacher_availability
+        self.tabu_tenure = tabu_tenure
 
     def assignWeek(self, offer_index, Turma, Offer):
         self.days_of_week[Turma][offer_index // 7][offer_index % 7] = Offer
@@ -124,6 +125,7 @@ class TSolutionInfo:
 
             slot1_teacher = solution2.class_slots[row_idx1][col_idx1].IdProfessor if solution2.class_slots[row_idx1][col_idx1] != -1 else None
             slot2_teacher = solution2.class_slots[row_idx2][col_idx2].IdProfessor if solution2.class_slots[row_idx2][col_idx2] != -1 else None
+            
             if in_tabu_list and self.useTabu:
                 #print("Solution is in Tabu list. Generating a new solution.")
                 #print("ID = ", self.Id)
@@ -157,7 +159,7 @@ class TSolutionInfo:
     def addTabuList(self, row1, col1, row2, col2):
         tabu_list.append((row1, col1, row2, col2))
         tabu_list.append((row2, col2, row1, col1))
-        while len(tabu_list) > tabu_tenure:
+        while len(tabu_list) > self.tabu_tenure:
             tabu_list.pop(0)
 
 
